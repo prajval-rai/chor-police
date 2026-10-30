@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { api, ApiError, saveToken } from "@/lib/api";
 import { audio } from "@/lib/audio";
 import { ROLE_META, ROLE_ORDER } from "@/lib/roles";
@@ -33,6 +33,10 @@ function useNickname() {
 
 export function Landing() {
   const [modal, setModal] = useState<"create" | "join" | "about" | null>(null);
+
+  useEffect(() => {
+    api.wake();
+  }, []);
 
   return (
     <main className="landing">

@@ -85,6 +85,12 @@ def require_host(player):
 
 # --- Endpoints ---------------------------------------------------------------
 
+@api_view(["GET"])
+def health(request):
+    """Liveness check for the host, and a cheap way to wake a sleeping server."""
+    return Response({"ok": True})
+
+
 @api_view(["POST"])
 def create_room(request):
     try:

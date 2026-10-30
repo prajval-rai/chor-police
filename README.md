@@ -26,6 +26,27 @@ Next.js proxies `/api/*` to Django (see `frontend/next.config.ts`), so the brows
 
 To play with friends on the same Wi-Fi, run `npm run dev -- -H 0.0.0.0` and share `http://<your-LAN-IP>:3000`.
 
+## Deploy for free (Render + Vercel)
+
+Deploy the API first: the frontend needs its URL at build time.
+
+**1. Django API → Render**
+1. Sign in at https://render.com with GitHub.
+2. **New → Blueprint**, pick this repo. Render reads [`render.yaml`](render.yaml) (free plan, `backend/` folder, gunicorn, a generated secret key, `DEBUG` off) → **Apply**.
+3. When the deploy is live, open `https://<service>.onrender.com/api/health`. It should show `{"ok": true}`. Copy that base URL.
+
+**2. Next.js frontend → Vercel**
+1. Sign in at https://vercel.com with GitHub. **Add New → Project**, import this repo.
+2. Set **Root Directory** to `frontend`. The framework is detected as Next.js.
+3. Under **Environment Variables**, add `API_ORIGIN` = `https://<service>.onrender.com` (no trailing slash).
+4. **Deploy**. Your game is live at `https://<project>.vercel.app`.
+
+Every `git push` to `main` redeploys both. If you change `API_ORIGIN`, redeploy on Vercel: the value is baked in at build time.
+
+Free-tier notes:
+- Render sleeps after ~15 minutes idle. The first visit takes up to a minute to wake it. The home page pings `/api/health` on load, so it starts waking while players type their names.
+- Render's free disk is wiped on restart/redeploy, so rooms in progress are lost then. Nothing else is stored.
+
 ## Rules as implemented
 
 1. Exactly 4 players. Each gets a secret role: Raja (1000), Mantri (800), Sipahi (500) or Chor (0).

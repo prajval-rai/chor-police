@@ -124,7 +124,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # --- Chor Police overrides ---------------------------------------------------
-ALLOWED_HOSTS = ["*"]  # dev: allow LAN play with friends
+# "*" suits local/LAN play. In production, set e.g. "chor-police-api.onrender.com".
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "*").split(",")
+
+if not DEBUG and SECRET_KEY.startswith("dev-only"):
+    raise RuntimeError("Set DJANGO_SECRET_KEY when DJANGO_DEBUG=0.")
 
 INSTALLED_APPS += ["rest_framework", "game"]
 

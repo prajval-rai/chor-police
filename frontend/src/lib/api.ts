@@ -41,6 +41,10 @@ async function request<T>(path: string, init: RequestInit = {}, token?: string |
     throw new ApiError("Can't reach the game server. Is it running?", 0);
   }
   const body = await res.json().catch(() => ({}));
+  if (res.status >= 502 && res.status <= 504) {
+    // Free hosting sleeps when idle; the first request wakes it up.
+    throw new ApiError("The game server is waking up. Try again in a few seconds.", res.status);
+  }
   if (!res.ok) throw new ApiError(body.error ?? "Something went wrong.", res.status);
   return body as T;
 }
@@ -52,6 +56,8 @@ interface Joined {
 }
 
 export const api = {
+  /** Fire-and-forget ping so a sleeping server starts waking while the user types. */
+  wake: () => fetch("/api/health", { cache: "no-store" }).catch(() => {}),
   createRoom: (nickname: string) =>
     request<Joined>("/rooms", { method: "POST", body: JSON.stringify({ nickname }) }),
   roomInfo: (code: string) =>

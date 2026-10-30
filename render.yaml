@@ -1,0 +1,24 @@
+# Render Blueprint for the Django API. Render → New → Blueprint → pick this repo.
+services:
+  - type: web
+    name: chor-police-api
+    runtime: python
+    plan: free
+    # Pick the region closest to your players. It can't be changed after creation.
+    # Options: oregon, ohio, virginia, frankfurt, singapore
+    region: singapore
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    # The free tier's disk is wiped on every restart, so the SQLite tables are
+    # recreated at each start. Fine for this game: rooms are temporary.
+    startCommand: python manage.py migrate --noinput && gunicorn chorpolice.wsgi --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 60
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_DEBUG
+        value: "0"
+      - key: DJANGO_ALLOWED_HOSTS
+        # Add your custom domain here too if you set one up later.
+        value: ".onrender.com,.vercel.app"
